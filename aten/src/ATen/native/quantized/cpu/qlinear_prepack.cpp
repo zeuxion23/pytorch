@@ -155,7 +155,10 @@ class QLinearPackWeightInt8 final {
         " instead");
 
     Tensor weight_contig = weight.contiguous();
-    auto weight_zp = weight.q_zero_point();
+
+    at::Tensor w_zero_points, w_scales;
+    std::tie(w_zero_points, w_scales) =
+        make_zero_points_and_scales_tensor(weight_contig);
 
     initQNNPACK();
 
@@ -163,13 +166,15 @@ class QLinearPackWeightInt8 final {
     // during the first invocation of operator run. Refer to qlinear.cpp for more
     // details. TODO Update to actually call pre-pack here once bias is removed
     // from pre-packing step.
+    // Weight zero points and scales are left uninitialized at this point.
+    // This is done just before weight packing in qlinear.cpp
     auto wt_ptr = std::make_unique<PackedLinearWeightsQnnp>(
         PackedLinearWeightsQnnp{nullptr,
                                 weight_contig, /* int8_t weight */
                                 bias_fp32.contiguous(), /* fp32 bias */
                                 c10::nullopt, /* input_scale */
-                                weight.q_scale(),
-                                weight_zp});
+                                w_scales,
+                                w_zero_points});
     return cpp_custom_type_hack::create(std::move(wt_ptr), weight.options());
   }
 #endif
