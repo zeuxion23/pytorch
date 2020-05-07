@@ -536,9 +536,20 @@ at::Tensor PackedConvWeightsQnnp<kSpatialDim>::apply_impl(
     for (int i = 0; i < wt_numel; ++i) {
       qnnp_w_data[i] = static_cast<c10::quint8>(w_data[i] + 128);
     }
+    at::Tensor bias;
     // Original bias was float, so we requantize it here.
-    auto bias = at::quantize_per_tensor(
-        bias_fp32, weight_scales_data[0] * act_input_scale, 0, c10::kQInt32);
+    if (is_per_channel) {
+      at::Tensor bias_quant_scales = weight_contig.q_per_channel_scales() * act_input_scale;
+      at::Tensor bias_zp = at::zeros(bias_quant_scales.sizes(), c10::kInt);
+      bias = at::native::quantize_per_channel_cpu(
+          bias_fp32, bias_quant_scales, bias_zp, 0, c10::kQInt32);
+    } else {
+      bias = at::native::quantize_per_tensor(
+          bias_fp32,
+          weight_contig.q_scale() * act_input_scale,
+          0,
+          c10::kQInt32);
+    }
 
     conv_p = qnnpack::conv_param_t(
         {kernel_w, kernel_h},

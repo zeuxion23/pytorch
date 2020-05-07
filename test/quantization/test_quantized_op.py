@@ -1932,7 +1932,6 @@ class TestQuantizedLinear(unittest.TestCase):
             # QNNPACK qlinear is flaky on MACOS. Issue #27326
             if IS_PPC or TEST_WITH_UBSAN or IS_MACOS:
                 return
-            use_channelwise = False
             use_multi_dim_input = False
             # QNNPACK supports uint8 in the kernels. In the op we shift the int8
             # weight values to uint8 to be on par with fbgemm. However, this causes
@@ -2054,7 +2053,6 @@ class TestQuantizedLinear(unittest.TestCase):
         if qengine == 'qnnpack':
             if IS_PPC or TEST_WITH_UBSAN:
                 return
-            use_channelwise = False
 
         with override_quantized_engine(qengine):
             W, (W_scale, W_zp, torch_type) = W
@@ -2310,13 +2308,19 @@ class TestQuantizedConv(unittest.TestCase):
             use_channelwise,
             qengine
     ):
+        # Added this to make it more likely to find a failing example.
+        if use_channelwise and qengine == 'qnnpack':
+            use_bias = True
+            groups = 1
+            output_channels_per_group = \
+                2 if output_channels_per_group < 2 else output_channels_per_group
+
         if qengine not in torch.backends.quantized.supported_engines:
             return
         if qengine == 'qnnpack':
             # QNNPACK qconv is flaky on MACOS. Issue #27326
             if IS_PPC or TEST_WITH_UBSAN or IS_MACOS:
                 return
-            use_channelwise = False
 
         input_channels = input_channels_per_group * groups
         output_channels = output_channels_per_group * groups
@@ -2374,7 +2378,6 @@ class TestQuantizedConv(unittest.TestCase):
         if qengine == 'qnnpack':
             if IS_PPC or TEST_WITH_UBSAN:
                 return
-            channelwise = False
 
         with override_quantized_engine(qengine):
             qconv_prepack = torch.ops.quantized.conv2d_prepack
