@@ -50,7 +50,8 @@ using supported_primitive_arg_types = guts::typelist::typelist<
       guts::if_constexpr<guts::typelist::contains<supported_primitive_arg_types, T>::value>([] {
         /* everything is ok, this is a primitive type */
       }, /* else */ [] {
-        auto tmap = c10::getCustomClassTypeMap();
+        // TODO This is called for each operator call and potentially expensive.
+        // This check should be moved to operator registration time instead.
         TORCH_CHECK(c10::isCustomClassRegistered<T>(), "Tried to use undefined class as input argument");
       });
     }
@@ -139,7 +140,8 @@ using supported_primitive_arg_types = guts::typelist::typelist<
       guts::if_constexpr<guts::typelist::contains<supported_primitive_arg_types, T>::value>([] {
         /* everything is ok, this is a primitive type */
       }, /* else */ [] {
-        auto tmap = getCustomClassTypeMap();
+        // TODO This is called for each operator call and potentially expensive.
+        // This check should be moved to operator registration time instead.
         TORCH_CHECK(c10::isCustomClassRegistered<T>(), "Tried to use undefined class as output");
       });
     }
