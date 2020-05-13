@@ -168,10 +168,12 @@ void RequestCallbackImpl::processRpc(
       auto& pythonRpcHandler = PythonRpcHandler::getInstance();
       std::shared_ptr<SerializedPyObj> serializedPyObj = nullptr;
       {
+        // Use GIL to guard the decref of the py::object returned by
+        // pythonRpcHandler.runPythonUdf(...)
         py::gil_scoped_acquire acquire;
         serializedPyObj =
             std::make_shared<SerializedPyObj>(pythonRpcHandler.serialize(
-                pythonRpcHandler.runPythonUdf(std::move(upc).movePythonUdf())));
+                pythonRpcHandler.runPythonUdf(upc.pythonUdf())));
       }
       markComplete(
           std::move(PythonResp(std::move(*serializedPyObj))).toMessage());
@@ -279,9 +281,11 @@ void RequestCallbackImpl::processRpc(
       IValue py_ivalue;
       try {
         {
+          // Use GIL to guard the decref of the py::object returned by
+          // pythonRpcHandler.runPythonUdf(...)
           py::gil_scoped_acquire acquire;
           py_ivalue = jit::toIValue(
-              pythonRpcHandler.runPythonUdf(std::move(uprc).movePythonUdf()),
+              pythonRpcHandler.runPythonUdf(uprc.pythonUdf()),
               PyObjectType::get());
         }
         ownerRRef->setValue(std::move(py_ivalue));
@@ -550,6 +554,7 @@ std::shared_ptr<FutureMessage> RequestCallbackImpl::processMessage(
   auto& rrefContext = RRefContext::getInstance();
   try {
     rrefContext.recordThreadLocalPendingRRefs();
+    // Deserialize PythonUDF here to trigger RRef unpickling
     std::unique_ptr<RpcCommandBase> rpc = deserializePythonRpcCommand(
         deserializeRequest(request), request.type());
     auto rrefsReadyFuture = rrefContext.waitForThreadLocalPendingRRefs();
