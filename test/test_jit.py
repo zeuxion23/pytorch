@@ -17948,6 +17948,9 @@ def add_autograd_test(
         skipTestIf=(),
         output_process_fn=lambda x: x,
         kwargs=None):
+    # Disable complex tests
+    if 'complex' in variant_name:
+        return
     basic_test_name = 'test_' + name
     if variant_name != '':
         basic_test_name += '_' + variant_name
