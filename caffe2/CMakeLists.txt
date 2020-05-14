@@ -321,6 +321,7 @@ if(NOT INTERN_BUILD_MOBILE OR NOT BUILD_CAFFE2_MOBILE)
     "${TOOLS_PATH}/autograd/templates/VariableType.h"
     "${TOOLS_PATH}/autograd/templates/VariableType.cpp"
     "${TOOLS_PATH}/autograd/templates/ProfiledType.cpp"
+    "${TOOLS_PATH}/autograd/templates/TraceType.cpp"
     "${TOOLS_PATH}/autograd/templates/Functions.h"
     "${TOOLS_PATH}/autograd/templates/Functions.cpp"
     "${TOOLS_PATH}/autograd/templates/python_functions.h"
@@ -429,7 +430,7 @@ if(NOT INTERN_BUILD_MOBILE OR NOT BUILD_CAFFE2_MOBILE)
     )
     add_library(caffe2_nvrtc SHARED ${ATen_NVRTC_STUB_SRCS})
     if(MSVC)
-      # Delay load nvcuda.dll so we can import torch compiled with cuda on a CPU-only machine 
+      # Delay load nvcuda.dll so we can import torch compiled with cuda on a CPU-only machine
       set(DELAY_LOAD_FLAGS "-DELAYLOAD:nvcuda.dll;delayimp.lib")
     else()
       set(DELAY_LOAD_FLAGS "")
