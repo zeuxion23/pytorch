@@ -10287,8 +10287,7 @@ class TestTorchDeviceType(TestCase):
             torch.rand(size, size, out=res2)
             self.assertEqual(res1, res2)
 
-    @dtypes(*torch.testing.get_all_fp_dtypes(include_bfloat16=False))
-    @dtypesIfCUDA(*torch.testing.get_all_fp_dtypes())
+    @dtypes(*torch.testing.get_all_fp_dtypes())
     def test_log_normal(self, device, dtype):
         a = torch.tensor([10], dtype=dtype, device=device).log_normal_()
         self.assertEqual(a.dtype, dtype)
@@ -10300,8 +10299,7 @@ class TestTorchDeviceType(TestCase):
         self.assertEqual(a.dtype, dtype)
         self.assertEqual(a.size(), torch.Size([1]))
 
-    @dtypes(*torch.testing.get_all_fp_dtypes(include_bfloat16=False))
-    @dtypesIfCUDA(*torch.testing.get_all_fp_dtypes())
+    @dtypes(*torch.testing.get_all_fp_dtypes())
     def test_exponential(self, device, dtype):
         a = torch.tensor([10], dtype=dtype, device=device).exponential_(0.5)
         self.assertEqual(a.dtype, dtype)
@@ -10318,8 +10316,7 @@ class TestTorchDeviceType(TestCase):
             torch.empty((1,), device=device, dtype=dtype).exponential_(-0.5)
 
     @skipIfNoSciPy
-    @dtypes(*torch.testing.get_all_fp_dtypes(include_bfloat16=False))
-    @dtypesIfCUDA(*torch.testing.get_all_fp_dtypes())
+    @dtypes(*torch.testing.get_all_fp_dtypes())
     def test_uniform_kstest(self, device, dtype):
         # TODO: https://github.com/pytorch/pytorch/issues/33793
         if IS_WINDOWS and device.startswith('cuda') and dtype == torch.bfloat16:
@@ -10347,8 +10344,7 @@ class TestTorchDeviceType(TestCase):
                 self.assertTrue(res.statistic < 0.1)
 
     @skipIfNoSciPy
-    @dtypes(*torch.testing.get_all_fp_dtypes(include_bfloat16=False))
-    @dtypesIfCUDA(*torch.testing.get_all_fp_dtypes())
+    @dtypes(*torch.testing.get_all_fp_dtypes())
     def test_lognormal_kstest(self, device, dtype):
         from scipy import stats
         size = 1000
@@ -10362,8 +10358,7 @@ class TestTorchDeviceType(TestCase):
                     self.assertTrue(res.statistic < 0.1)
 
     @skipIfNoSciPy
-    @dtypes(*torch.testing.get_all_fp_dtypes(include_bfloat16=False))
-    @dtypesIfCUDA(*torch.testing.get_all_fp_dtypes())
+    @dtypes(*torch.testing.get_all_fp_dtypes())
     def test_exponential_kstest(self, device, dtype):
         from scipy import stats
         size = 1000
@@ -10373,8 +10368,7 @@ class TestTorchDeviceType(TestCase):
             self.assertTrue(res.statistic < 0.1)
 
     @skipIfNoSciPy
-    @dtypes(*torch.testing.get_all_fp_dtypes(include_bfloat16=False))
-    @dtypesIfCUDA(*torch.testing.get_all_fp_dtypes())
+    @dtypes(*torch.testing.get_all_fp_dtypes())
     def test_cauchy_kstest(self, device, dtype):
         from scipy import stats
         size = 1000
